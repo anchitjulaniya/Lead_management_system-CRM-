@@ -6,6 +6,17 @@ This project was built using the **MERN stack** and follows clean architecture p
 
 ---
 
+# 🌐 Live Demo
+
+**Frontend (Vercel)**  
+https://lead-management-system-crm.vercel.app/
+
+**Backend API (Render)**  
+https://lead-management-system-crm.onrender.com
+
+**GitHub Repository**  
+https://github.com/anchitjulaniya/Lead_management_system-CRM-
+
 # Tech Stack
 
 Frontend
