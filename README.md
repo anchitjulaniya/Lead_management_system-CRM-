@@ -194,23 +194,6 @@ Improves performance for filtered queries.
   /socket
 ```
 
----
-
-# Environment Variables
-
-Backend `.env`
-
-```
-PORT=5000
-MONGO_URI=mongodb://localhost:27017/crm
-JWT_SECRET=your_secret_key
-```
-
-Frontend `.env`
-
-```
-VITE_API_URL=http://localhost:5000
-```
 
 ---
 
