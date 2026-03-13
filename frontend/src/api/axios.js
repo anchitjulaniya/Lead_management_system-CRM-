@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "http://localhost:5000"
+  baseURL:"https://lead-management-system-crm.onrender.com"  //"http://localhost:5000"
 });
 
 // attach token automatically to every request
