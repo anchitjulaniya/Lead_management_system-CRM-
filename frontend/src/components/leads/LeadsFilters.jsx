@@ -24,6 +24,7 @@ export default function LeadsFilters({ filters, setFilters }) {
       <input
         type="date"
         className="border px-3 py-2 rounded"
+        placeholder="created from"
         value={filters.createdFrom}
         onChange={(e) => handleChange("createdFrom", e.target.value)}
       />
