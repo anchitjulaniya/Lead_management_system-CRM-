@@ -1,25 +1,29 @@
 # Lead Management System (CRM+) — MERN Stack
 
-A mini CRM application to manage sales leads with authentication, RBAC authorization, lead management, analytics, and real-time notifications.
+A **mini CRM (Customer Relationship Management) application** built with the **MERN stack** to manage sales leads efficiently.
 
-This project was built using the **MERN stack** and follows clean architecture principles.
+The system includes **authentication, role-based access control (RBAC), lead management, analytics dashboard, real-time notifications, and user management**.
+
+This project demonstrates **full-stack development with scalable architecture, secure APIs, and responsive UI**.
 
 ---
 
 # 🌐 Live Demo
 
-**Frontend (Vercel)**  
+**Frontend (Vercel)**
 https://lead-management-system-crm.vercel.app/
 
-**Backend API (Render)**  
+**Backend API (Render)**
 https://lead-management-system-crm.onrender.com
 
-**GitHub Repository**  
+**GitHub Repository**
 https://github.com/anchitjulaniya/Lead_management_system-CRM-
+
+---
 
 # Tech Stack
 
-Frontend
+## Frontend
 
 * React
 * Tailwind CSS
@@ -27,7 +31,7 @@ Frontend
 * React Router
 * Socket.IO Client
 
-Backend
+## Backend
 
 * Node.js
 * Express.js
@@ -38,15 +42,175 @@ Backend
 
 ---
 
-# Features
+# Design Decisions
 
-## Authentication
+Some architectural decisions made during development:
 
-* JWT based login and registration
-* Secure password hashing using bcrypt
+• JWT authentication for stateless API security  
+• RBAC middleware for centralized permission enforcement  
+• Socket.IO for real-time notifications  
+• Pagination and filtering implemented at database level  
+• Indexes added to optimize lead queries  
+• React Context used for authentication state management
+
+# Application Pages
+
+After authentication, users can access the following main pages:
+
+## Dashboard
+
+The **Dashboard** provides an overview of lead performance.
+
+Features:
+
+* Total leads count
+* Leads by status
+* Leads by source
+* Real-time updates when leads are created or updated
+
+Endpoint used:
+
+```
+GET /dashboard/summary
+```
+
+---
+
+## Leads Page
+
+The **Leads page** is the core part of the CRM system where users manage sales leads.
+
+Features:
+
+* Create new leads
+* Update lead details
+* Delete leads (Admin only)
+* Assign leads to sales users
+* Change lead status
+* Search leads
+* Filter by status, source, and date
+* Sort leads
+* Pagination support
+
+Lead fields include:
+
+* Name
+* Phone
+* Email
+* Source
+* Status
+* Notes
+* Assigned User
+
+Example API request:
+
+```
+GET /leads?q=rahul&status=new&page=1&limit=10
+```
+
+Supported filters:
+
+* search (name/email/phone)
+* status
+* source
+* assignedTo
+* createdFrom
+* createdTo
+
+---
+
+## Users Page
+
+The **Users page** allows administrators to manage system users.
+
+Only **Admin users** can access this page.
+
+Features:
+
+* View all users
+* View current user roles
+* Update user roles
+* Role updates apply immediately
+
+Example table:
+
+```
+Name        Email                Role        Change Role
+--------------------------------------------------------
+Rahul       rahul@test.com       sales       manager
+Priya       priya@test.com       manager     sales
+Admin       admin@test.com       admin       disabled
+```
+
+API used:
+
+```
+GET /users
+PATCH /users/:id/role
+```
+
+Example request:
+
+```
+PATCH /users/6658a9c2/role
+
+{
+  "role": "manager"
+}
+```
+
+---
+
+## Profile Page
+
+The **Profile page** shows information about the logged-in user.
+
+Features:
+
+* View user details
+* See current role
+* Account information
+* Quick access to user identity within the system
+
+---
+
+# Authentication
+
+Authentication is handled using **JWT (JSON Web Tokens)**.
+
+Features:
+
+* User registration
+* Secure login
+* Password hashing using bcrypt
 * Token-based API protection
 
-## Role-Based Access Control (RBAC)
+Endpoints:
+
+```
+POST /auth/register
+POST /auth/login
+```
+
+All protected APIs require:
+
+```
+Authorization: Bearer <JWT_TOKEN>
+```
+
+Token contains:
+
+```
+sub  -> userId
+role -> user role
+exp  -> expiration time
+```
+
+---
+
+# Role-Based Access Control (RBAC)
+
+The system uses **RBAC to restrict access based on user roles**.
 
 Roles supported:
 
@@ -54,27 +218,13 @@ Roles supported:
 * Manager
 * Sales
 
-Permissions example:
-
-| Role    | Permissions                |
-| ------- | -------------------------- |
-| Admin   | Full access                |
-| Manager | View all leads + analytics |
-| Sales   | Only own/assigned leads    |
-
----
-
-# Role-Based Access Control (RBAC)
-
-This project implements **Role-Based Access Control (RBAC)** to ensure that users can only perform actions allowed by their assigned role. Each API route checks the required permission using a middleware.
-
 Permissions are defined in:
 
 ```
 backend/utils/permissions.js
 ```
 
-Example permission structure:
+Example structure:
 
 ```javascript
 module.exports = {
@@ -105,15 +255,17 @@ module.exports = {
 };
 ```
 
+---
+
+## Role Permissions
 
 ### Admin
 
-The **Admin** role has full system access.
+Full system access.
 
 Permissions:
 
-* Create, update, and delete leads
-* View all leads
+* Create, update, delete leads
 * Manage users and roles
 * Access dashboard analytics
 * View notifications
@@ -122,14 +274,14 @@ Permissions:
 
 ### Manager
 
-The **Manager** role focuses on team coordination and lead management.
+Responsible for managing leads.
 
 Permissions:
 
-* View and update leads
-* Assign leads to sales users
+* View leads
+* Assign leads
+* Update lead status
 * Access dashboard analytics
-* View notifications
 
 Restrictions:
 
@@ -140,88 +292,26 @@ Restrictions:
 
 ### Sales
 
-The **Sales** role is limited to working on their own leads.
+Focused on handling assigned leads.
 
 Permissions:
 
 * Create leads
-* View leads they created or are assigned to
-* Update their assigned leads
+* View assigned leads
+* Update assigned leads
 * View notifications
-
 
 Restrictions:
 
 * Cannot delete leads
 * Cannot manage users
-* Cannot access dashboard analytics
+* Cannot access analytics
 
 ---
 
-# Sample Login Credentials
+# Lead Ownership Rules
 
-You can use the following accounts to test the system:
-
-### Admin
-
-```
-Email: admin@test.com
-Password: 123456
-Role: admin
-```
-
-### Manager
-
-```
-Email: manager@test.com
-Password: 123456
-Role: manager
-```
-
-### Sales Users
-
-```
-Email: sales@test.com
-Password: 123456
-Role: sales
-```
-
-```
-Email: test@test.com
-Password: 123456
-Role: sales
-```
-
----
-
-# Permission Enforcement
-
-Permissions are enforced using a middleware in the backend:
-
-```
-backend/middlewares/rbacMiddleware.js
-```
-
-Example route protection:
-
-```javascript
-router.get(
-  "/dashboard/summary",
-  authMiddleware,
-  rbac("dashboard:read"),
-  dashboardController.getSummary
-);
-```
-
-The middleware checks whether the logged-in user's role includes the required permission before allowing access.
-
----
-
-# Lead Access Rules
-
-Additional rules are applied for **Sales users**:
-
-A sales user can access a lead **only if**:
+Sales users can access a lead only if:
 
 ```
 createdBy === loggedInUser
@@ -229,123 +319,7 @@ OR
 assignedTo === loggedInUser
 ```
 
-This ensures proper ownership and prevents unauthorized access to other users' leads.
-
----
-
-# Notification Permissions
-
-Notifications are sent for important events such as:
-
-* Lead assignment
-* Lead status updates
-* New lead creation
-
-Users can only read their **own notifications**.
-
----
-
-# Security
-
-All protected APIs require:
-
-```
-Authorization: Bearer <JWT_TOKEN>
-```
-
-The token contains:
-
-```
-sub  -> userId
-role -> user role
-exp  -> token expiration
-```
-
-RBAC checks the role before executing the controller.
-
-
-# Lead Management
-
-Features:
-
-* Create lead
-* Update lead
-* Delete lead
-* Assign leads
-* Change lead status
-* Ownership enforcement
-
-Lead fields:
-
-* Name
-* Phone
-* Email
-* Source
-* Status
-* Notes
-* Assigned user
-
----
-
-# Advanced Lead List API
-
-Supports:
-
-* Search
-* Filtering
-* Sorting
-* Pagination
-
-Example:
-
-```
-GET /leads?q=rahul&status=new&page=1&limit=10
-```
-
-Filters supported:
-
-* q (search name/email/phone)
-* status
-* source
-* assignedTo
-* createdFrom
-* createdTo
-
----
-
-# Dashboard Analytics
-
-Endpoint:
-
-```
-GET /dashboard/summary
-```
-
-Returns:
-
-* Total leads
-* Leads by status
-* Leads by source
-
-Example:
-
-```
-{
-  "totalLeads": 150,
-  "byStatus": {
-    "new": 45,
-    "contacted": 30,
-    "qualified": 25,
-    "won": 35,
-    "lost": 15
-  },
-  "bySource": {
-    "website": 80,
-    "referral": 45,
-    "cold": 25
-  }
-}
-```
+This ensures proper **data ownership and privacy**.
 
 ---
 
@@ -353,36 +327,34 @@ Example:
 
 Implemented using **Socket.IO**.
 
-Triggers:
+Notifications are triggered when:
 
-* Lead created
-* Lead assigned
-* Lead status changed
+* A lead is created
+* A lead is assigned
+* Lead status changes
 
 Notifications are:
 
-* Sent in realtime
-* Persisted in MongoDB
+* Delivered in real time
+* Stored in MongoDB
 
 ---
 
 # MongoDB Indexes
 
-Indexes used:
+Indexes were added to improve query performance.
 
-* createdBy
-* assignedTo
-* status
-* source
-* createdAt
+Single indexes:
 
-Compound index:
+createdBy  
+assignedTo  
+status  
+source  
+createdAt  
 
-```
+Compound index for lead list queries:
+
 status + source + createdAt
-```
-
-Improves performance for filtered queries.
 
 ---
 
@@ -402,9 +374,10 @@ Improves performance for filtered queries.
   /components
   /pages
   /context
+  /hooks
+  /services
   /socket
 ```
-
 
 ---
 
@@ -423,6 +396,17 @@ git clone <repository_url>
 ```
 cd backend
 npm install
+Create a `.env` file in the backend folder.
+
+Example:
+
+PORT=5000
+
+MONGO_URI=mongodb://localhost:27017/crm
+
+JWT_SECRET=your_jwt_secret_key
+
+CLIENT_URL=http://localhost:5173
 npm run dev
 ```
 
@@ -433,21 +417,33 @@ npm run dev
 ```
 cd frontend
 npm install
+Create a `.env` file in the backend folder.
+
+Example:
+
+PORT=5000
+
+MONGO_URI=mongodb://localhost:27017/crm
+
+JWT_SECRET=your_jwt_secret_key
+
+CLIENT_URL=http://localhost:5173
 npm run dev
 ```
 
 ---
 
+
 # API Endpoints
 
-Authentication
+## Authentication
 
 ```
 POST /auth/register
 POST /auth/login
 ```
 
-Leads
+## Leads
 
 ```
 POST /leads
@@ -457,21 +453,47 @@ PATCH /leads/:id
 DELETE /leads/:id
 ```
 
-Users
+## Users
 
 ```
 GET /users
 PATCH /users/:id/role
 ```
 
-Notifications
+## Notifications
 
 ```
 GET /notifications
 PATCH /notifications/:id/read
 ```
 
-Dashboard
+# API Documentation
+
+A Postman collection is available here:
+
+https://github.com/anchitjulaniya/Lead_management_system-CRM-/postman
+
+It includes all endpoints for:
+
+- Authentication
+- Leads
+- Users
+- Notifications
+- Dashboard
+
+# Postman Setup
+
+This project includes a Postman collection for testing APIs.
+
+Before using the collection:
+
+Create an environment variable:
+
+Example request:
+
+POST {{BaseURL}}/auth/login
+
+## Dashboard
 
 ```
 GET /dashboard/summary
@@ -479,8 +501,35 @@ GET /dashboard/summary
 
 ---
 
+# Sample Login Credentials
+
+### Admin
+
+```
+Email: admin@test.com
+Password: 123456
+Role: admin
+```
+
+### Manager
+
+```
+Email: manager@test.com
+Password: 123456
+Role: manager
+```
+
+### Sales
+
+```
+Email: sales@test.com
+Password: 123456
+Role: sales
+```
+
+---
+
 # Author
 
 Anchit Julaniya
-
 MERN Stack Developer
