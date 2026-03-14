@@ -64,12 +64,6 @@ Permissions example:
 
 ---
 
-Below is a **clean README section** you can add to your project explaining **RBAC permissions and sample login credentials**. This is written in a **professional way suitable for reviewers**.
-
-You can paste this directly into your `README.md`.
-
----
-
 # Role-Based Access Control (RBAC)
 
 This project implements **Role-Based Access Control (RBAC)** to ensure that users can only perform actions allowed by their assigned role. Each API route checks the required permission using a middleware.

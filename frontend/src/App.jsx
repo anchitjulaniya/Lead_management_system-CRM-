@@ -3,6 +3,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Home from './pages/Home'
 import Navbar from "./components/Navbar";
 import { lazy, Suspense } from "react";
+import Users from "./pages/Users";
 
 const Leads = lazy(() => import("./pages/Leads"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -63,6 +64,16 @@ function App() {
               <UserProfile />
             </ProtectedRoute>
           }  
+        />
+
+        <Route
+          path="/users"
+          element={
+            <ProtectedRoute>
+              <Navbar />
+              <Users />
+            </ProtectedRoute>
+          }
         />
 
         <Route path="*" element={<NotFound />} />
