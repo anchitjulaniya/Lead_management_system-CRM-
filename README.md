@@ -478,7 +478,7 @@ It includes all endpoints for:
 - Authentication
 - Leads
 - Users
-- Notifications
+- Notifications - with notification sound
 - Dashboard
 
 # Postman Setup
