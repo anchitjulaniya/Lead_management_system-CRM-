@@ -94,7 +94,7 @@ socket.connect();
 
       toast.success("Login successful");
 
-      navigate("/leads");
+      navigate("/");
 
     } catch (err) {
 
