@@ -28,7 +28,6 @@ export default function Navbar() {
 
       <div className="max-w-7xl mx-auto flex justify-between items-center px-4 py-3">
 
-        {/* Left Section */}
 
         <div className="flex items-center gap-4">
 
@@ -49,8 +48,6 @@ export default function Navbar() {
 
         </div>
 
-
-        {/* Right Section */}
          {!user && (
           <div className="flex items-center gap-6">
             <Link
@@ -72,7 +69,6 @@ export default function Navbar() {
 
           
 
-          {/* Role Badge */}
 
           <Link to="/profile">
             <span className="hidden hover:scale-110 transition-all sm:flex items-center px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-sm capitalize">
@@ -80,16 +76,12 @@ export default function Navbar() {
             </span>
           </Link>
 
-          {/* Drop down */}
 
            <NavbarDropDown />
-          
-          {/* Notification Bell */}
+ 
 
           <NotificationBell />
 
-
-          {/* Logout Button */}
 
           <button
             onClick={handleLogout}
@@ -103,7 +95,6 @@ export default function Navbar() {
           </button>
 
 
-          {/* Mobile Logout */}
 
           <button
             onClick={handleLogout}

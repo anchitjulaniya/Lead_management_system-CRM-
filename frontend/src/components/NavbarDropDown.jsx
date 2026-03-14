@@ -10,7 +10,6 @@ function NavbarDropDown() {
 
   const dropdownRef = useRef(null);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
 
     function handleClickOutside(event) {
