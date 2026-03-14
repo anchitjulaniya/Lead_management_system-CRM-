@@ -1,55 +1,31 @@
-import { useState, useContext, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { AuthContext } from "../context/AuthContext";
+import { useEffect, useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import API from "../api/axios";
 import toast from "react-hot-toast";
-import connectSocket from "../socket/socket";
 
-const socket = connectSocket
-export default function Login() {
-
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-
-  const [loading, setLoading] = useState(false);
+export default function Register() {
 
   const navigate = useNavigate();
-  const { login } = useContext(AuthContext);
 
-  /*
-  Check if token already exists
-  */
-  useEffect(() => {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
 
-    const token = sessionStorage.getItem("token");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
-    if (token) {
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-      try {
-
-        const payload = JSON.parse(atob(token.split(".")[1]));
-
-        const isExpired = payload.exp * 1000 < Date.now();
-
-        if (!isExpired) {
-          navigate("/leads");
-        } else {
-          sessionStorage.removeItem("token");
-        }
-
-      } catch {
-        sessionStorage.removeItem("token");
-      }
-
-    }
-
-  }, [navigate]);
 
   const validateForm = () => {
 
-    if (!email || !password) {
-      toast.error("Email and password are required");
+    if (!name || !email || !password || !confirmPassword) {
+      toast.error("All fields are required");
+      return false;
+    }
+
+    if (name.length < 2) {
+      toast.error("Name must be at least 2 characters");
       return false;
     }
 
@@ -66,8 +42,15 @@ export default function Login() {
       return false;
     }
 
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return false;
+    }
+
     return true;
+
   };
+
 
   const handleSubmit = async (e) => {
 
@@ -79,28 +62,21 @@ export default function Login() {
 
     try {
 
-      const res = await API.post("/auth/login", {
+      await API.post("/auth/register", {
+        name,
         email,
         password
       });
 
-      login(res.data);
+      toast.success("Account created successfully");
 
-      socket.auth = {
-  token: res.data.token
-};
-
-socket.connect();
-
-      toast.success("Login successful");
-
-      navigate("/leads");
+      navigate("/login");
 
     } catch (err) {
 
       toast.error(
         err.response?.data?.message ||
-        "Login failed"
+        "Registration failed"
       );
 
     } finally {
@@ -109,24 +85,43 @@ socket.connect();
 
   };
 
+  useEffect(()=>{
+    const token = sessionStorage.getItem("token");
+    if(token){
+      navigate('/')
+    }
+  }, [])
+
   return (
 
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-100 px-4">
 
       <div className="bg-white shadow-xl rounded-xl p-8 w-full max-w-md animate-fadeIn">
 
-        <h2 className="text-3xl font-bold text-center mb-6 text-gray-800">
-          CRM Login
+        <h2 className="text-3xl font-bold text-center mb-2 text-gray-800">
+          Create Account
         </h2>
 
         <p className="text-gray-500 text-center mb-6">
-          Sign in to manage your leads
+          Register to start managing your leads
         </p>
+
 
         <form
           onSubmit={handleSubmit}
           className="space-y-4"
         >
+
+          {/* Name */}
+
+          <input
+            type="text"
+            placeholder="Full name"
+            className="w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+
 
           {/* Email */}
 
@@ -137,6 +132,7 @@ socket.connect();
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
+
 
           {/* Password */}
 
@@ -150,19 +146,39 @@ socket.connect();
               onChange={(e) => setPassword(e.target.value)}
             />
 
-            <button
-              type="button"
-              className="absolute right-3 top-3 text-sm text-gray-500"
-              onClick={() =>
+          </div>
+
+
+          {/* Confirm Password */}
+
+          <input
+            type={showPassword ? "text" : "password"}
+            placeholder="Confirm password"
+            className="w-full border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={confirmPassword}
+            onChange={(e) =>
+              setConfirmPassword(e.target.value)
+            }
+          />
+
+
+          {/* Show Password */}
+
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+
+            <input
+              type="checkbox"
+              onChange={() =>
                 setShowPassword(!showPassword)
               }
-            >
-              {showPassword ? "Hide" : "Show"}
-            </button>
+            />
+
+            Show password
 
           </div>
 
-          {/* Button */}
+
+          {/* Submit */}
 
           <button
             type="submit"
@@ -172,24 +188,30 @@ socket.connect();
 
             {loading ? (
               <span className="flex justify-center items-center gap-2">
+
                 <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
-                Logging in...
+
+                Creating account...
+
               </span>
             ) : (
-              "Login"
+              "Register"
             )}
 
           </button>
 
+
+          {/* Login link */}
+
           <p className="text-center text-sm text-gray-600 mt-4">
 
-            Don't have an account?
+            Already have an account?
 
             <Link
-              to="/register"
-              className="text-blue-600 ml-1 hover:underline "
+              to="/login"
+              className="text-blue-600 ml-1 hover:underline hover:font-semibold"
             >
-              Register
+              Login
             </Link>
 
           </p>

@@ -13,10 +13,6 @@ router.get(
   userController.getUsers
 );
 
-/*
-PATCH /users/:id/role
-Admin only
-*/
 router.patch(
   "/:id/role",
   auth,

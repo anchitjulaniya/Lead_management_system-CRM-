@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import API from "../api/axios";
-import socket from "../socket/socket";
+import connectSocket from "../socket/socket";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
 dayjs.extend(relativeTime);
+
+const socket = connectSocket;
 
 export default function NotificationBell() {
   const [notifications, setNotifications] = useState([]);
@@ -44,9 +46,21 @@ export default function NotificationBell() {
   useEffect(() => {
     fetchNotifications();
 
-    socket.on("notification", (data) => {
-      setNotifications((prev) => [data, ...prev]);
-    });
+    socket.on("notification", (notification) => {
+
+    setNotifications(prev => [
+      notification,
+      ...prev
+    ]);
+
+    setUnread(prev => prev + 1);
+
+  });
+
+  return () => {
+    socket.off("notification");
+  };
+
   }, []);
 
   return (
@@ -57,7 +71,7 @@ export default function NotificationBell() {
       >
         🔔{" "}
         {unreadCount > 0 && (
-          <div className="bg-red-500 font-bold text-[12px] h-[18px] w-[18px] flex items-center justify-center text-white rounded-full font-semibold absolute top-[-2px] right-[-4px]">
+          <div className="bg-red-500 text-[12px] h-[18px] w-[18px] flex items-center justify-center text-white rounded-full font-semibold absolute top-[-2px] right-[-4px]">
             {unreadCount}
           </div>
         )}

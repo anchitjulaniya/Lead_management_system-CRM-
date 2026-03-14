@@ -9,6 +9,15 @@ const rbac = require("../middlewares/rbacMiddleware");
 router.post("/", auth, rbac("lead:write"), leadController.createLead);
 
 router.get("/", auth, rbac("lead:read"), leadController.getLeads);
+
 router.patch('/:id', auth, rbac("lead:write"), leadController.updateLead);
-router.delete('/:id', auth, rbac("lead:write"), leadController.deleteLead);
+// router.delete('/:id', auth, rbac("lead:write"), leadController.deleteLead);
+
+router.delete(
+  "/:id",
+  auth,
+  rbac("lead:delete"),
+  leadController.deleteLead
+);
+
 module.exports = router;

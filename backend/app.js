@@ -10,6 +10,7 @@ const leadRoutes = require("./routes/leadRoutes");
 const userRoutes = require("./routes/userRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
+const errorHandler = require("./middlewares/errorMiddileware");
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ app.use(cors());
 app.use(express.json());
 app.use(morgan("dev"));
 
+app.use(errorHandler);
 app.use("/auth", authRoutes);
 app.use("/leads", leadRoutes);
 app.use("/users", userRoutes);

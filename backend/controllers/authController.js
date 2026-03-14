@@ -14,6 +14,7 @@ exports.register = async (req, res) => {
     password: hashed
   });
 
+  user.password = undefined;
   res.json({
     message: "User created",
     user

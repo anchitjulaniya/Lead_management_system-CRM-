@@ -6,8 +6,14 @@ module.exports = (permission) => {
 
     const role = req.user.role;
 
-    if (!permissions[role].includes(permission)) {
-      return res.status(403).json({ message: "Forbidden" });
+    const rolePermissions = permissions[role] || [];
+
+     if (!rolePermissions.includes(permission)) {
+
+      return res.status(403).json({
+        message: "Forbidden"
+      });
+
     }
 
     next();

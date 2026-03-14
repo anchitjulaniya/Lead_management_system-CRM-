@@ -5,10 +5,6 @@ const rbac = require("../middlewares/rbacMiddleware");
 
 const dashboardController = require("../controllers/dashboardController");
 
-/*
-GET /dashboard/summary
-Dashboard analytics
-*/
 router.get(
   "/summary",
   auth,

@@ -13,6 +13,7 @@ module.exports = {
   manager: [
     "lead:read",
     "lead:write",
+    "user:read",
     "dashboard:read",
     "notification:read"
   ],

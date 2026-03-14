@@ -9,5 +9,5 @@ exports.createNotification = async (userId, message) => {
   });
 
   socketService.sendNotification(userId, notification);
-
-};
+  return notification;
+};  

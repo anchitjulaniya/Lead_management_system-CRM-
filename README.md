@@ -64,6 +64,212 @@ Permissions example:
 
 ---
 
+Below is a **clean README section** you can add to your project explaining **RBAC permissions and sample login credentials**. This is written in a **professional way suitable for reviewers**.
+
+You can paste this directly into your `README.md`.
+
+---
+
+# Role-Based Access Control (RBAC)
+
+This project implements **Role-Based Access Control (RBAC)** to ensure that users can only perform actions allowed by their assigned role. Each API route checks the required permission using a middleware.
+
+Permissions are defined in:
+
+```
+backend/utils/permissions.js
+```
+
+Example permission structure:
+
+```javascript
+module.exports = {
+
+  admin: [
+    "lead:read",
+    "lead:write",
+    "lead:delete",
+    "user:read",
+    "user:write",
+    "dashboard:read",
+    "notification:read"
+  ],
+
+  manager: [
+    "lead:read",
+    "lead:write",
+    "dashboard:read",
+    "notification:read"
+  ],
+
+  sales: [
+    "lead:read",
+    "lead:write",
+    "notification:read"
+  ]
+
+};
+```
+
+
+### Admin
+
+The **Admin** role has full system access.
+
+Permissions:
+
+* Create, update, and delete leads
+* View all leads
+* Manage users and roles
+* Access dashboard analytics
+* View notifications
+
+---
+
+### Manager
+
+The **Manager** role focuses on team coordination and lead management.
+
+Permissions:
+
+* View and update leads
+* Assign leads to sales users
+* Access dashboard analytics
+* View notifications
+
+Restrictions:
+
+* Cannot delete leads
+* Cannot manage users
+
+---
+
+### Sales
+
+The **Sales** role is limited to working on their own leads.
+
+Permissions:
+
+* Create leads
+* View leads they created or are assigned to
+* Update their assigned leads
+* View notifications
+
+
+Restrictions:
+
+* Cannot delete leads
+* Cannot manage users
+* Cannot access dashboard analytics
+
+---
+
+# Sample Login Credentials
+
+You can use the following accounts to test the system:
+
+### Admin
+
+```
+Email: admin@test.com
+Password: 123456
+Role: admin
+```
+
+### Manager
+
+```
+Email: manager@test.com
+Password: 123456
+Role: manager
+```
+
+### Sales Users
+
+```
+Email: sales@test.com
+Password: 123456
+Role: sales
+```
+
+```
+Email: test@test.com
+Password: 123456
+Role: sales
+```
+
+---
+
+# Permission Enforcement
+
+Permissions are enforced using a middleware in the backend:
+
+```
+backend/middlewares/rbacMiddleware.js
+```
+
+Example route protection:
+
+```javascript
+router.get(
+  "/dashboard/summary",
+  authMiddleware,
+  rbac("dashboard:read"),
+  dashboardController.getSummary
+);
+```
+
+The middleware checks whether the logged-in user's role includes the required permission before allowing access.
+
+---
+
+# Lead Access Rules
+
+Additional rules are applied for **Sales users**:
+
+A sales user can access a lead **only if**:
+
+```
+createdBy === loggedInUser
+OR
+assignedTo === loggedInUser
+```
+
+This ensures proper ownership and prevents unauthorized access to other users' leads.
+
+---
+
+# Notification Permissions
+
+Notifications are sent for important events such as:
+
+* Lead assignment
+* Lead status updates
+* New lead creation
+
+Users can only read their **own notifications**.
+
+---
+
+# Security
+
+All protected APIs require:
+
+```
+Authorization: Bearer <JWT_TOKEN>
+```
+
+The token contains:
+
+```
+sub  -> userId
+role -> user role
+exp  -> token expiration
+```
+
+RBAC checks the role before executing the controller.
+
+
 # Lead Management
 
 Features:

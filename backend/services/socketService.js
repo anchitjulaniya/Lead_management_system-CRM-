@@ -24,6 +24,7 @@ exports.initialize = (socketServer) => {
       next();
 
     } catch (error) {
+      console.error("Socket authentication error:", error);
       next(new Error("Authentication error"));
     }
 

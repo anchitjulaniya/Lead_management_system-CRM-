@@ -5,10 +5,6 @@ const rbac = require("../middlewares/rbacMiddleware");
 
 const notificationController = require("../controllers/notificationController");
 
-/*
-GET /notifications
-Get notifications for logged-in user
-*/
 router.get(
   "/",
   auth,
@@ -16,10 +12,6 @@ router.get(
   notificationController.getNotifications
 );
 
-/*
-PATCH /notifications/:id/read
-Mark notification as read
-*/
 router.patch(
   "/:id/read",
   auth,

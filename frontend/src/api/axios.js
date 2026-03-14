@@ -1,8 +1,10 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL:"https://lead-management-system-crm.onrender.com"  //"http://localhost:5000"
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000"
 });
+
+//"https://lead-management-system-crm.onrender.com"  
 
 // attach token automatically to every request
 API.interceptors.request.use((req) => {

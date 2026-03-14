@@ -1,23 +1,56 @@
 const Lead = require("../models/Lead");
+const User = require("../models/User");
 const notificationService = require("../services/notificationService");
 const socketService = require("../services/socketService");
-
-
+const mongoose = require("mongoose");
 
 exports.createLead = async (req, res) => {
-
+  console.log(req)
   try {
+    if (!req.body.name || req.body.name.length < 2) {
+      return res.status(400).json({
+        message: "Name must be at least 2 characters"
+      });
+    }
+const phoneRegex = /^[0-9]{10}$/;
+
+if (!phoneRegex.test(req.body.phone)) {
+  return res.status(400).json({
+    message: "Invalid phone number"
+  });
+}
+
+    
+     if (req.body.assignedTo) {
+
+      const user = await User.findById(req.body.assignedTo);
+
+      if (!user || user.role !== "sales") {
+        return res.status(400).json({
+          message: "Lead must be assigned to a valid sales user"
+        });
+      }
+
+    }
 
     const lead = await Lead.create({
       ...req.body,
       createdBy: req.user.sub
     });
-
-    // emit realtime event
+    
+    
+   
+ if (lead.assignedTo) {
+      await notificationService.createNotification(
+        lead.assignedTo,
+        `A new lead (${lead.name}) has been created`
+      );
+  }
+    
     socketService.emit("leadCreated", lead);
 
     res.json({
-      message: "Lead created",
+      message: "Lead created successfully",
       lead
     });
 
@@ -55,19 +88,16 @@ exports.getLeads = async (req, res) => {
 
     const match = {};
 
-    /*
-    Role based restriction for sales
-    */
+
     if (req.user.role === "sales") {
+      const userId = new mongoose.Types.ObjectId(req.user.sub);
+
       match.$or = [
-        { createdBy: req.user.sub },
-        { assignedTo: req.user.sub }
+        { createdBy: userId },
+        { assignedTo: userId }
       ];
     }
 
-    /*
-    Search
-    */
     if (q) {
       match.$or = [
         { name: { $regex: q, $options: "i" } },
@@ -76,16 +106,10 @@ exports.getLeads = async (req, res) => {
       ];
     }
 
-    /*
-    Filters
-    */
     if (status) match.status = status;
     if (source) match.source = source;
     if (assignedTo) match.assignedTo = assignedTo;
 
-    /*
-    Date filters
-    */
     if (createdFrom || createdTo) {
 
       match.createdAt = {};
@@ -100,9 +124,7 @@ exports.getLeads = async (req, res) => {
 
     }
 
-    /*
-    Sorting
-    */
+
     const [field, order] = sort.split(":");
 
     const sortStage = {
@@ -110,9 +132,7 @@ exports.getLeads = async (req, res) => {
       _id: -1
     };
 
-    /*
-    Aggregation pipeline
-    */
+    
     const results = await Lead.aggregate([
 
       { $match: match },
@@ -176,9 +196,8 @@ exports.updateLead = async (req, res) => {
       });
     }
 
-    /*
-    Ownership check for sales role
-    */
+    console.log("Role:", req.user.role);
+
     if (
       req.user.role === "sales" &&
       lead.createdBy.toString() !== req.user.sub &&
@@ -192,24 +211,37 @@ exports.updateLead = async (req, res) => {
     const previousAssigned = lead.assignedTo?.toString();
     const previousStatus = lead.status;
 
-    /*
-    Update lead fields
-    */
+    if (req.body.assignedTo) {
+
+       const user = await User.findById(req.body.assignedTo);
+
+      if (!user) {
+        return res.status(404).json({
+          message: "Assigned user not found"
+        });
+      }
+
+      if (user.role !== "sales") {
+        return res.status(400).json({
+          message: "Lead can only be assigned to sales users"
+        });
+      }
+
+      req.body.assignedTo = new mongoose.Types.ObjectId(req.body.assignedTo);
+    }
+    if (req.body.assignedTo === "") {
+      delete req.body.assignedTo;
+    }
+
     Object.assign(lead, req.body);
 
     await lead.save();
 
-    /*
-    Emit realtime update
-    */
     socketService.emit("leadUpdated", lead);
 
-    /*
-    Notification: Lead assigned or reassigned
-    */
     if (
       req.body.assignedTo &&
-      req.body.assignedTo !== previousAssigned
+      req.body.assignedTo.toString() !== previousAssigned
     ) {
 
       await notificationService.createNotification(
@@ -219,9 +251,6 @@ exports.updateLead = async (req, res) => {
 
     }
 
-    /*
-    Notification: Status changed
-    */
     if (
       req.body.status &&
       req.body.status !== previousStatus &&
@@ -256,32 +285,67 @@ exports.deleteLead = async (req, res) => {
 
   try {
 
-    const lead = await Lead.findByIdAndDelete(req.params.id);
+    const lead = await Lead.findById(req.params.id);
 
     if (!lead) {
       return res.status(404).json({
+        success: false,
         message: "Lead not found"
       });
     }
 
-    /*
-    Emit realtime delete
-    */
-    socketService.emit("leadDeleted", req.params.id);
+    if (
+      req.user.role === "sales" &&
+      lead.createdBy.toString() !== req.user.sub &&
+      lead.assignedTo?.toString() !== req.user.sub
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden"
+      });
+    }
 
-    res.json({
-      message: "Lead deleted"
+    await lead.deleteOne();
+
+    /*
+      Notification should NOT break deletion
+    */
+    if (lead.assignedTo) {
+
+      try {
+
+        await notificationService.createNotification(
+          lead.assignedTo,
+          `Lead (${lead.name}) was deleted`
+        );
+
+      } catch (notificationError) {
+
+        console.error("Notification error:", notificationError);
+
+      }
+
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Lead deleted successfully"
     });
 
   } catch (err) {
 
-    res.status(500).json({
+    console.error("Delete lead error:", err);
+
+    return res.status(500).json({
+      success: false,
       message: "Server error"
     });
 
   }
 
 };
+
+
 exports.getStats = async (req, res) => {
   try {
     const { from, to } = req.query;
@@ -307,45 +371,6 @@ exports.getStats = async (req, res) => {
     res.json({
       message: "Stats retrieved",
       stats
-    });
-  } catch (err) {
-    res.status(500).json({
-      message: "Server error"
-    });
-  }
-};
-exports.getLeads = async (req, res) => {
-
-  try {
-    let { page = 1, limit = 10, q, status, source } = req.query;
-
-    page = parseInt(page);
-    limit = parseInt(limit);
-    const filter = {};
-    if (q) {
-      filter.$or = [
-
-        { name: { $regex: q, $options: "i" } },
-        { email: { $regex: q, $options: "i" } },
-        { phone: { $regex: q, $options: "i" } } 
-      ];
-    }
-    if (status) filter.status = status;
-    if (source) filter.source = source;
-    const total = await Lead.countDocuments
-      (filter);
-    const leads = await Lead.find(filter)
-      .skip((page - 1) * limit)
-      .limit(limit)
-      .sort({ createdAt: -1 });
-    res.json({
-      data: leads,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit)
-      }
     });
   } catch (err) {
     res.status(500).json({
