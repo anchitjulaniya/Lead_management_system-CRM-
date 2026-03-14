@@ -35,13 +35,13 @@ exports.initialize = (socketServer) => {
 
     const userId = socket.user.sub;
 
-    console.log("User connected:", userId);
+    console.log("User connected from socket:", userId);
 
 
     socket.join(userId);
 
     socket.on("disconnect", () => {
-      console.log("User disconnected:", userId);
+      console.log("User disconnected from socket:", userId);
     });
 
   });
