@@ -1,13 +1,15 @@
 import { Link, useNavigate } from "react-router-dom";
 import NotificationBell from "./NotificationBell";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { LuLogOut } from "react-icons/lu";
 import toast from "react-hot-toast";
 
+import NavbarDropDown from "./NavbarDropDown";
+
 export default function Navbar() {
 
-  const navigate = useNavigate();
+  const navigate = useNavigate(); 
   const { user, logout } = useContext(AuthContext);
 
   const handleLogout = () => {
@@ -68,6 +70,8 @@ export default function Navbar() {
         )}
         {user && <div className="flex items-center gap-4">
 
+          
+
           {/* Role Badge */}
 
           <Link to="/profile">
@@ -76,7 +80,10 @@ export default function Navbar() {
             </span>
           </Link>
 
+          {/* Drop down */}
 
+           <NavbarDropDown />
+          
           {/* Notification Bell */}
 
           <NotificationBell />
