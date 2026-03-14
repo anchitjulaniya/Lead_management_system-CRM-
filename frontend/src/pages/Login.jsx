@@ -5,7 +5,10 @@ import API from "../api/axios";
 import toast from "react-hot-toast";
 import connectSocket from "../socket/socket";
 
-const socket = connectSocket
+const token = sessionStorage.getItem("token");
+
+const socket = connectSocket(token);
+
 export default function Login() {
 
   const [email, setEmail] = useState("");
