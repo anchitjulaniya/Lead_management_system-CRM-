@@ -6,7 +6,8 @@ import relativeTime from "dayjs/plugin/relativeTime";
 
 dayjs.extend(relativeTime);
 
-const socket = connectSocket;
+const token = sessionStorage.getItem("token");
+const socket = connectSocket(token);
 
 export default function NotificationBell() {
   const [notifications, setNotifications] = useState([]);
@@ -15,12 +16,13 @@ export default function NotificationBell() {
   const markAsRead = async (id) => {
     try {
       const res = await API.patch(`/notifications/${id}/read`);
-      console.log(res);
+      
       setNotifications((prev) =>
         prev.map((n) => (n._id === id ? { ...n, read: true } : n)),
       );
     } catch (err) {
       console.error("Failed to mark notification read", err);
+
     }
   };
 
@@ -44,6 +46,9 @@ export default function NotificationBell() {
     }
   };
   useEffect(() => {
+    
+    socket.connect();
+
     fetchNotifications();
 
     socket.on("notification", (notification) => {
@@ -53,12 +58,13 @@ export default function NotificationBell() {
       ...prev
     ]);
 
-    setUnread(prev => prev + 1);
+    // setUnread(prev => prev + 1);
 
   });
 
   return () => {
     socket.off("notification");
+    socket.disconnect();
   };
 
   }, []);
@@ -78,7 +84,7 @@ export default function NotificationBell() {
       </button>
 
       {show && (
-        <div className="absolute right-0 mt-2 w-56 sm:w-72 bg-white shadow rounded p-3">
+        <div className="absolute right-0 mt-2 w-56 sm:w-72 bg-white shadow rounded p-3 overflow-y-scroll h-fit max-h-[75vh]">
           <h3 className="font-semibold mb-2">Notifications</h3>
 
           {notifications.length === 0 && (

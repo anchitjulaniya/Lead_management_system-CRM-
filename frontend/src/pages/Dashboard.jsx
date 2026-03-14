@@ -16,7 +16,7 @@ export default function Dashboard() {
     try {
 
       const res = await API.get("/dashboard/summary");
-      console.log("dashboard/summary")
+      
       setStats(res.data);
 
     } catch (err) {
@@ -26,6 +26,7 @@ export default function Dashboard() {
       navigate('/leads')
     } else {
       console.log("Failed to load dashboard data");
+      toast.error("Failed to load dashboard data. Please try again!")
     }
     }
 
