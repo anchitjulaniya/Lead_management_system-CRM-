@@ -1,1 +1,1 @@
-export const BaseURL = 'http://localhost:5000';
+export const BaseURL = 'https://lead-management-system-crm.onrender.com';
