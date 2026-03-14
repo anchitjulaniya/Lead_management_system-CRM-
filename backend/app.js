@@ -23,6 +23,12 @@ app.use(express.json());
 app.use(morgan("dev"));
 
 app.use(errorHandler);
+app.get("/", (req, res) => {
+  res.json({
+    success: true,
+    message: "Lead Management API is running successfully"
+  });
+});
 app.use("/auth", authRoutes);
 app.use("/leads", leadRoutes);
 app.use("/users", userRoutes);

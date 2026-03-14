@@ -471,7 +471,7 @@ PATCH /notifications/:id/read
 
 A Postman collection is available here:
 
-https://github.com/anchitjulaniya/Lead_management_system-CRM-/postman
+https://github.com/anchitjulaniya/Lead_management_system-CRM-/tree/main/postman
 
 It includes all endpoints for:
 
