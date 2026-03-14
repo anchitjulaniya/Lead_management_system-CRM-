@@ -42,7 +42,14 @@ function NavbarDropDown() {
       {open && (
 
         <div className="absolute top-8 left-0 w-40 bg-white shadow-lg rounded-lg border overflow-hidden">
-
+          
+          <Link
+            to="/"
+            onClick={() => setOpen(false)}
+            className="block px-4 py-2 hover:bg-gray-100"
+          >
+            Home
+          </Link>
           <Link
             to="/dashboard"
             onClick={() => setOpen(false)}
